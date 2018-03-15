@@ -1,6 +1,6 @@
 import { resolveUrl } from './lib/resolve-url.js';
 
-class LocationLite extends window.HTMLElement {
+export class LocationLite extends window.HTMLElement {
   static get is () { return 'location-lite'; }
   
   constructor () {
@@ -8,6 +8,7 @@ class LocationLite extends window.HTMLElement {
     this._boundHashChanged = this._hashChanged.bind(this);
     this._boundUrlChanged = this._urlChanged.bind(this);
     this._boundGlobalOnClick = this._globalOnClick.bind(this);
+    this.attachShadow({ mode: 'close' });
   }
   
   connectedCallback () {
@@ -213,5 +214,5 @@ class LocationLite extends window.HTMLElement {
 if (!window.customElements.get(LocationLite.is)) {
   window.customElements.define(LocationLite.is, LocationLite);
 } else {
-  console.warn(`${LocationLite.is} is already defined somewhere. Please check your code.`)
+  console.warn(`${LocationLite.is} is already defined somewhere. Please check your code.`);
 }
