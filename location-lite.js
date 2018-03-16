@@ -1,22 +1,24 @@
+/// <reference path="typings-project/global.d.ts"/>
+
 import { resolveUrl } from './lib/resolve-url.js';
 
 export class LocationLite extends window.HTMLElement {
   static get is () { return 'location-lite'; }
-  
+
   constructor () {
     super();
     this._boundHashChanged = this._hashChanged.bind(this);
     this._boundUrlChanged = this._urlChanged.bind(this);
     this._boundGlobalOnClick = this._globalOnClick.bind(this);
-    this.attachShadow({ mode: 'close' });
+    this._urlSpaceRegExp = null;
   }
-  
+
   connectedCallback () {
     window.addEventListener('hashchange', this._boundHashChanged);
-    window.addEventListener('location-changed', this._boundUrlChanged);
+    window.addEventListener('location-change', this._boundUrlChanged);
     window.addEventListener('popstate', this._boundUrlChanged);
     document.body.addEventListener('click', this._boundGlobalOnClick, true);
-    
+
     if (window.performance) {
       this._lastChangedAt = window.performance.now() - (this.dwellTime - 200);
     }
@@ -26,10 +28,10 @@ export class LocationLite extends window.HTMLElement {
     this._initialized = false;
     this._urlChanged();
   }
-  
+
   disconnectedCallback () {
     window.removeEventListener('hashchange', this._boundHashChanged);
-    window.removeEventListener('location-changed', this._boundUrlChanged);
+    window.removeEventListener('location-change', this._boundUrlChanged);
     window.removeEventListener('popstate', this._boundUrlChanged);
     document.body.removeEventListener('click', this._boundGlobalOnClick);
     this._initialized = false;
@@ -37,9 +39,9 @@ export class LocationLite extends window.HTMLElement {
 
   _hashChanged () {
     this.hash = window.decodeURIComponent(window.location.hash.slice(1));
-    this.dispatchEvent(new window.CustomEvent('location-lite-hash-change', { detail: this.hash }));
+    this.dispatchEvent(new window.CustomEvent('hash-change', { detail: this.hash }));
   }
-  
+
   _urlChanged () {
     // We want to extract all info out of the updated URL before we
     // try to write anything back into it.
@@ -48,17 +50,17 @@ export class LocationLite extends window.HTMLElement {
     // one when we set this.hash. Likewise for query.
     this._dontUpdateUrl = true;
     this._hashChanged();
-    
+
     this.path = window.decodeURIComponent(window.location.pathname);
-    this.dispatchEvent(new window.CustomEvent('location-lite-path-change', { detail: this.path }));
-    
+    this.dispatchEvent(new window.CustomEvent('path-change', { detail: this.path }));
+
     this.query = window.location.search.slice(1);
-    this.dispatchEvent(new window.CustomEvent('location-lite-query-change', { detail: this.query }));
+    this.dispatchEvent(new window.CustomEvent('query-change', { detail: this.query }));
 
     this._dontUpdateUrl = false;
     this._updateUrl();
   }
-  
+
   _getUrl () {
     var partiallyEncodedPath = window.encodeURI(this.path).replace(/\#/g, '%23').replace(/\?/g, '%3F'); // eslint-disable-line no-useless-escape
     var partiallyEncodedQuery = '';
@@ -71,7 +73,7 @@ export class LocationLite extends window.HTMLElement {
     }
     return (partiallyEncodedPath + partiallyEncodedQuery + partiallyEncodedHash);
   }
-  
+
   _updateUrl () {
     if (this._dontUpdateUrl || !this._initialized) {
       return;
@@ -94,9 +96,9 @@ export class LocationLite extends window.HTMLElement {
     } else {
       window.history.pushState({}, '', fullNewUrl);
     }
-    window.dispatchEvent(new window.CustomEvent('location-changed'));
+    window.dispatchEvent(new window.CustomEvent('location-change'));
   }
-  
+
   /**
    * A necessary evil so that links work as expected. Does its best to
    * bail out early if possible.
@@ -122,9 +124,9 @@ export class LocationLite extends window.HTMLElement {
     }
 
     window.history.pushState({}, '', href);
-    window.dispatchEvent(new window.CustomEvent('location-changed'));
+    window.dispatchEvent(new window.CustomEvent('location-change'));
   }
-  
+
   /**
    * Returns the absolute URL of the link (if any) that this click event
    * is clicking on, if we can and should override the resulting full
@@ -143,8 +145,8 @@ export class LocationLite extends window.HTMLElement {
     if (event.metaKey || event.ctrlKey) {
       return null;
     }
-    var eventPath = event.composedPath();
-    var anchor = null;
+    const eventPath = event.composedPath();
+    let anchor = null;
     for (var i = 0; i < eventPath.length; i++) {
       var element = eventPath[i];
       if (element.tagName === 'A' && element.href) {
@@ -170,23 +172,23 @@ export class LocationLite extends window.HTMLElement {
         window.top !== window) {
       return null;
     }
-    var href = anchor.href;
+    const href = anchor.href;
     // It only makes sense for us to intercept same-origin navigations.
     // pushState/replaceState don't work with cross-origin links.
-    var url;
+    let url;
     if (document.baseURI != null) {
       url = resolveUrl(href, /** @type {string} */(document.baseURI));
     } else {
       url = resolveUrl(href);
     }
-    var origin;
+    let origin;
     // IE Polyfill
     if (window.location.origin) {
       origin = window.location.origin;
     } else {
       origin = window.location.protocol + '//' + window.location.host;
     }
-    var urlOrigin;
+    let urlOrigin;
     if (url.origin) {
       urlOrigin = url.origin;
     } else {

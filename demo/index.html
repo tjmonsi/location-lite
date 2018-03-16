@@ -1,0 +1,14 @@
+<location-lite></location-lite>
+<a href="/a">Test</a>
+
+<script type="module">
+  import '../location-lite.js';
+
+  const el = document.querySelector('location-lite');
+  el.addEventListener('path-change', (event) => {
+    console.log(event)
+  })
+
+  window.history.pushState({}, '', '/b');
+  window.dispatchEvent(new window.CustomEvent('location-change'));
+</script>
