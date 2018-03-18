@@ -1,6 +1,6 @@
 {
   "name": "@littleq/location-lite",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Location getter that makes your site a single-page-app",
   "main": "location-lite.js",
   "scripts": {
