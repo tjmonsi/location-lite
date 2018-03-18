@@ -37,7 +37,7 @@
   "size-limit": [
     {
       "path": "location-lite.js",
-      "limit": "1.5KB"
+      "limit": "1.55KB"
     }
   ],
   "semistandard": {

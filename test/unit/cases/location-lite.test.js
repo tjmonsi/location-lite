@@ -1,5 +1,6 @@
 // @ts-nocheck
 /* eslint-disable no-undef */
+var sinon = window.sinon;
 
 suite('LocationLite', () => {
   test('should have not be a HTMLUnknownElement constructor', () => {
@@ -115,5 +116,48 @@ suite('LocationLite', () => {
 
     const a = document.querySelector('#anchor');
     MockInteractions.tap(a);
+  });
+
+  test('when path is set, should change window.location.pathname', done => {
+    const el = document.querySelector('#test');
+    el.path = '/search';
+    setTimeout(() => {
+      expect(window.location.pathname).to.equal('/search');
+      done();
+    });
+  });
+
+  test('when hash is set, should change window.location.hash', done => {
+    const el = document.querySelector('#test');
+    el.hash = 'hey';
+    setTimeout(() => {
+      expect(window.decodeURIComponent(window.location.hash.slice(1))).to.equal('hey');
+      done();
+    });
+  });
+
+  test('when query is set, should change window.location.search', done => {
+    const el = document.querySelector('#test');
+    el.query = 'a=b&c=d';
+    setTimeout(() => {
+      expect(window.location.search.slice(1)).to.equal('a=b&c=d');
+      done();
+    });
+  });
+
+  test('when path, hash, query is set, should return same results and also call _updateUrl once', done => {
+    const el = document.querySelector('#test');
+    sinon.spy(el, '_updateUrl');
+    expect(el._updateUrl.callCount).to.equal(0);
+    el.path = '/search/one';
+    el.hash = 'hashtag2';
+    el.query = 'e=f&g=h';
+    setTimeout(() => {
+      expect(window.location.pathname).to.equal('/search/one');
+      expect(window.decodeURIComponent(window.location.hash.slice(1))).to.equal('hashtag2');
+      expect(window.location.search.slice(1)).to.equal('e=f&g=h');
+      expect(el._updateUrl.callCount).to.equal(1);
+      done();
+    });
   });
 });

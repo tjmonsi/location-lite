@@ -22,6 +22,8 @@ When the URL is `/search?query=583#details`, the location-lite's properties will
 
 It would also fire `path-change`, `query-change`, and `hash-change` events.
 
+You can also set the `path`, `query`, and `hash` and it will reflect on the window.location and also on window.history
+
 Settable properties would be the following:
 
 - dwellTime: Copied from iron-location, it protects against accidental history spamming by only adding entries to the user's history if the URL stays unchanged for `dwellTime` milliseconds
