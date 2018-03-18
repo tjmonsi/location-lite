@@ -1,7 +1,7 @@
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
-  (factory((global.ElementLite = {})));
+  (factory((global.LocationLite = {})));
 }(this, (function (exports) { 'use strict';
 
   var workingURL;
@@ -56,6 +56,7 @@
     function LocationLite () {
       superclass.call(this);
       this.__data = {};
+      this.__dataInvalid = false;
 
       this._boundHashChanged = this._hashChanged.bind(this);
       this._boundUrlChanged = this._urlChanged.bind(this);
@@ -69,7 +70,7 @@
     LocationLite.prototype = Object.create( superclass && superclass.prototype );
     LocationLite.prototype.constructor = LocationLite;
 
-    var prototypeAccessors = { urlSpaceRegex: { configurable: true } };
+    var prototypeAccessors = { urlSpaceRegex: { configurable: true },path: { configurable: true },query: { configurable: true },hash: { configurable: true } };
     var staticAccessors = { is: { configurable: true } };
 
     staticAccessors.is.get = function () { return 'location-lite'; };
@@ -104,12 +105,67 @@
       return this.__data.urlSpaceRegex;
     };
 
+    prototypeAccessors.path.set = function (path) {
+      if (this.__data.path !== path) {
+        this.__data.path = path;
+        this._invalidateProperties();
+      }
+    };
+
+    prototypeAccessors.path.get = function () {
+      return this.__data.path;
+    };
+
+    prototypeAccessors.query.set = function (query) {
+      if (this.__data.query !== query) {
+        this.__data.query = query;
+        this._invalidateProperties();
+      }
+    };
+
+    prototypeAccessors.query.get = function () {
+      return this.__data.query;
+    };
+
+    prototypeAccessors.hash.set = function (hash) {
+      if (this.__data.hash !== hash) {
+        this.__data.hash = hash;
+        this._invalidateProperties();
+      }
+    };
+
+    prototypeAccessors.hash.get = function () {
+      return this.__data.hash;
+    };
+
+    LocationLite.prototype._invalidateProperties = function _invalidateProperties () {
+      var this$1 = this;
+
+      if (!this.__dataInvalid) {
+        this.__dataInvalid = true;
+
+        Promise.resolve().then(function () {
+          if (this$1.__dataInvalid) {
+            this$1.__dataInvalid = false;
+            this$1._updateUrl();
+          }
+        });
+      }
+    };
+
     LocationLite.prototype._hashChanged = function _hashChanged () {
+      var this$1 = this;
+
       this.hash = window.decodeURIComponent(window.location.hash.slice(1));
-      this.dispatchEvent(new window.CustomEvent('hash-change', { detail: this.hash }));
+
+      Promise.resolve().then(function () {
+        this$1.dispatchEvent(new window.CustomEvent('hash-change', { detail: this$1.hash }));
+      });
     };
 
     LocationLite.prototype._urlChanged = function _urlChanged () {
+      var this$1 = this;
+
       // We want to extract all info out of the updated URL before we
       // try to write anything back into it.
       //
@@ -117,15 +173,16 @@
       // one when we set this.hash. Likewise for query.
       this._dontUpdateUrl = true;
       this._hashChanged();
-
       this.path = window.decodeURIComponent(window.location.pathname);
-      this.dispatchEvent(new window.CustomEvent('path-change', { detail: this.path }));
-
       this.query = window.location.search.slice(1);
-      this.dispatchEvent(new window.CustomEvent('query-change', { detail: this.query }));
+
+      Promise.resolve().then(function () {
+        this$1.dispatchEvent(new window.CustomEvent('path-change', { detail: this$1.path }));
+        this$1.dispatchEvent(new window.CustomEvent('query-change', { detail: this$1.query }));
+      });
 
       this._dontUpdateUrl = false;
-      this._updateUrl();
+      // this._updateUrl();
     };
 
     LocationLite.prototype._getUrl = function _getUrl () {

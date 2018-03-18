@@ -1,7 +1,7 @@
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
-  (factory((global.ElementLite = {})));
+  (factory((global.LocationLite = {})));
 }(this, (function (exports) { 'use strict';
 
   let workingURL;
@@ -58,6 +58,7 @@
     constructor () {
       super();
       this.__data = {};
+      this.__dataInvalid = false;
 
       this._boundHashChanged = this._hashChanged.bind(this);
       this._boundUrlChanged = this._urlChanged.bind(this);
@@ -97,9 +98,58 @@
       return this.__data.urlSpaceRegex;
     }
 
+    set path (path) {
+      if (this.__data.path !== path) {
+        this.__data.path = path;
+        this._invalidateProperties();
+      }
+    }
+
+    get path () {
+      return this.__data.path;
+    }
+
+    set query (query) {
+      if (this.__data.query !== query) {
+        this.__data.query = query;
+        this._invalidateProperties();
+      }
+    }
+
+    get query () {
+      return this.__data.query;
+    }
+
+    set hash (hash) {
+      if (this.__data.hash !== hash) {
+        this.__data.hash = hash;
+        this._invalidateProperties();
+      }
+    }
+
+    get hash () {
+      return this.__data.hash;
+    }
+
+    _invalidateProperties () {
+      if (!this.__dataInvalid) {
+        this.__dataInvalid = true;
+
+        Promise.resolve().then(() => {
+          if (this.__dataInvalid) {
+            this.__dataInvalid = false;
+            this._updateUrl();
+          }
+        });
+      }
+    }
+
     _hashChanged () {
       this.hash = window.decodeURIComponent(window.location.hash.slice(1));
-      this.dispatchEvent(new window.CustomEvent('hash-change', { detail: this.hash }));
+
+      Promise.resolve().then(() => {
+        this.dispatchEvent(new window.CustomEvent('hash-change', { detail: this.hash }));
+      });
     }
 
     _urlChanged () {
@@ -110,15 +160,16 @@
       // one when we set this.hash. Likewise for query.
       this._dontUpdateUrl = true;
       this._hashChanged();
-
       this.path = window.decodeURIComponent(window.location.pathname);
-      this.dispatchEvent(new window.CustomEvent('path-change', { detail: this.path }));
-
       this.query = window.location.search.slice(1);
-      this.dispatchEvent(new window.CustomEvent('query-change', { detail: this.query }));
+
+      Promise.resolve().then(() => {
+        this.dispatchEvent(new window.CustomEvent('path-change', { detail: this.path }));
+        this.dispatchEvent(new window.CustomEvent('query-change', { detail: this.query }));
+      });
 
       this._dontUpdateUrl = false;
-      this._updateUrl();
+      // this._updateUrl();
     }
 
     _getUrl () {
