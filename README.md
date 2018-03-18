@@ -9,7 +9,7 @@ open in the same window, so middle mouse clicks and ctrl/cmd clicks work fine.
 
 You can customize this behavior with the `urlSpaceRegex`.
 
-This is a copied version of without using Polymer `https://github.com/PolymerElements/iron-location/blob/__auto_generated_3.0_preview/iron-location.js`
+This is a copied version of without using Polymer https://github.com/PolymerElements/iron-location/blob/__auto_generated_3.0_preview/iron-location.js
 
 
 ## Properties
@@ -181,7 +181,7 @@ or
 
 ```js
 // provided that node_modules is resolved in your configurations
-require('@littleq/location-lite/dist/location-lite.cjs.js').ElementLite;
+require('@littleq/location-lite/dist/location-lite.cjs.js');
 ```
 
 If you are going to load it via the `<script>` tag, you need to do these
