@@ -1,6 +1,38 @@
-/// <reference path="typings-project/global.d.ts"/>
+var workingURL;
+var urlDoc, urlBase, anchor;
 
-import { resolveUrl } from './lib/resolve-url.js';
+/**
+ * @param {string} path
+ * @param {string=} base
+ * @return {!URL|!HTMLAnchorElement}
+ */
+var resolveUrl = function (path, base) {
+  if (workingURL === undefined) {
+    workingURL = false;
+    try {
+      var u = new window.URL('b', 'http://a');
+      u.pathname = 'c%20d';
+      workingURL = (u.href === 'http://a/c%20d');
+      workingURL = workingURL && (new window.URL('http://www.google.com/?foo bar').href === 'http://www.google.com/?foo%20bar');
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  if (workingURL) {
+    return new window.URL(path, base);
+  }
+  if (!urlDoc) {
+    urlDoc = document.implementation.createHTMLDocument('url');
+    urlBase = urlDoc.createElement('base');
+    urlDoc.head.appendChild(urlBase);
+    anchor = /** @type {HTMLAnchorElement} */(urlDoc.createElement('a'));
+  }
+  urlBase.href = base;
+  anchor.href = path.replace(/ /g, '%20');
+  return anchor;
+};
+
+/// <reference path="typings-project/global.d.ts"/>
 
 /**
  * # LocationLite
@@ -14,11 +46,9 @@ import { resolveUrl } from './lib/resolve-url.js';
  *
  */
 
-export class LocationLite extends window.HTMLElement {
-  static get is () { return 'location-lite'; }
-
-  constructor () {
-    super();
+var LocationLite = (function (superclass) {
+  function LocationLite () {
+    superclass.call(this);
     this.__data = {};
 
     this._boundHashChanged = this._hashChanged.bind(this);
@@ -29,7 +59,16 @@ export class LocationLite extends window.HTMLElement {
     this.dwellTime = 2000;
   }
 
-  connectedCallback () {
+  if ( superclass ) LocationLite.__proto__ = superclass;
+  LocationLite.prototype = Object.create( superclass && superclass.prototype );
+  LocationLite.prototype.constructor = LocationLite;
+
+  var prototypeAccessors = { urlSpaceRegex: { configurable: true } };
+  var staticAccessors = { is: { configurable: true } };
+
+  staticAccessors.is.get = function () { return 'location-lite'; };
+
+  LocationLite.prototype.connectedCallback = function connectedCallback () {
     window.addEventListener('hashchange', this._boundHashChanged);
     window.addEventListener('location-change', this._boundUrlChanged);
     window.addEventListener('popstate', this._boundUrlChanged);
@@ -40,31 +79,31 @@ export class LocationLite extends window.HTMLElement {
     }
     this._initialized = true;
     this._urlChanged();
-  }
+  };
 
-  disconnectedCallback () {
+  LocationLite.prototype.disconnectedCallback = function disconnectedCallback () {
     window.removeEventListener('hashchange', this._boundHashChanged);
     window.removeEventListener('location-change', this._boundUrlChanged);
     window.removeEventListener('popstate', this._boundUrlChanged);
     document.body.removeEventListener('click', this._boundGlobalOnClick);
     this._initialized = false;
-  }
+  };
 
-  set urlSpaceRegex (urlSpaceRegex) {
+  prototypeAccessors.urlSpaceRegex.set = function (urlSpaceRegex) {
     this.__data.urlSpaceRegex = urlSpaceRegex;
     this._urlSpaceRegExp = RegExp(urlSpaceRegex);
-  }
+  };
 
-  get urlSpaceRegex () {
+  prototypeAccessors.urlSpaceRegex.get = function () {
     return this.__data.urlSpaceRegex;
-  }
+  };
 
-  _hashChanged () {
+  LocationLite.prototype._hashChanged = function _hashChanged () {
     this.hash = window.decodeURIComponent(window.location.hash.slice(1));
     this.dispatchEvent(new window.CustomEvent('hash-change', { detail: this.hash }));
-  }
+  };
 
-  _urlChanged () {
+  LocationLite.prototype._urlChanged = function _urlChanged () {
     // We want to extract all info out of the updated URL before we
     // try to write anything back into it.
     //
@@ -81,9 +120,9 @@ export class LocationLite extends window.HTMLElement {
 
     this._dontUpdateUrl = false;
     this._updateUrl();
-  }
+  };
 
-  _getUrl () {
+  LocationLite.prototype._getUrl = function _getUrl () {
     var partiallyEncodedPath = window.encodeURI(this.path).replace(/\#/g, '%23').replace(/\?/g, '%3F'); // eslint-disable-line no-useless-escape
     var partiallyEncodedQuery = '';
     if (this.query) {
@@ -94,9 +133,9 @@ export class LocationLite extends window.HTMLElement {
       partiallyEncodedHash = '#' + window.encodeURI(this.hash);
     }
     return (partiallyEncodedPath + partiallyEncodedQuery + partiallyEncodedHash);
-  }
+  };
 
-  _updateUrl () {
+  LocationLite.prototype._updateUrl = function _updateUrl () {
     if (this._dontUpdateUrl || !this._initialized) {
       return;
     }
@@ -119,7 +158,7 @@ export class LocationLite extends window.HTMLElement {
       window.history.pushState({}, '', fullNewUrl);
     }
     window.dispatchEvent(new window.CustomEvent('location-change'));
-  }
+  };
 
   /**
    * A necessary evil so that links work as expected. Does its best to
@@ -127,7 +166,7 @@ export class LocationLite extends window.HTMLElement {
    *
    * @param {MouseEvent} event .
    */
-  _globalOnClick (event) {
+  LocationLite.prototype._globalOnClick = function _globalOnClick (event) {
     // If another event handler has stopped this event then there's nothing
     // for us to do. This can happen e.g. when there are multiple
     // iron-location elements in a page.
@@ -147,7 +186,7 @@ export class LocationLite extends window.HTMLElement {
 
     window.history.pushState({}, '', href);
     window.dispatchEvent(new window.CustomEvent('location-change'));
-  }
+  };
 
   /**
    * Returns the absolute URL of the link (if any) that this click event
@@ -157,7 +196,7 @@ export class LocationLite extends window.HTMLElement {
    * @param {MouseEvent} event .
    * @return {string?} .
    */
-  _getSameOriginLinkHref (event) {
+  LocationLite.prototype._getSameOriginLinkHref = function _getSameOriginLinkHref (event) {
     // We only care about left-clicks.
     if (event.button !== 0) {
       return null;
@@ -167,8 +206,8 @@ export class LocationLite extends window.HTMLElement {
     if (event.metaKey || event.ctrlKey) {
       return null;
     }
-    const eventPath = event.composedPath();
-    let anchor = null;
+    var eventPath = event.composedPath();
+    var anchor = null;
     for (var i = 0; i < eventPath.length; i++) {
       var element = eventPath[i];
       if (element.tagName === 'A' && element.href) {
@@ -194,23 +233,23 @@ export class LocationLite extends window.HTMLElement {
         window.top !== window) {
       return null;
     }
-    const href = anchor.href;
+    var href = anchor.href;
     // It only makes sense for us to intercept same-origin navigations.
     // pushState/replaceState don't work with cross-origin links.
-    let url;
+    var url;
     if (document.baseURI != null) {
       url = resolveUrl(href, /** @type {string} */(document.baseURI));
     } else {
       url = resolveUrl(href);
     }
-    let origin;
+    var origin;
     // IE Polyfill
     if (window.location.origin) {
       origin = window.location.origin;
     } else {
       origin = window.location.protocol + '//' + window.location.host;
     }
-    let urlOrigin;
+    var urlOrigin;
     if (url.origin) {
       urlOrigin = url.origin;
     } else {
@@ -232,11 +271,18 @@ export class LocationLite extends window.HTMLElement {
     // Need to use a full URL in case the containing page has a base URI.
     var fullNormalizedHref = resolveUrl(normalizedHref, window.location.href).href;
     return fullNormalizedHref;
-  }
-}
+  };
+
+  Object.defineProperties( LocationLite.prototype, prototypeAccessors );
+  Object.defineProperties( LocationLite, staticAccessors );
+
+  return LocationLite;
+}(window.HTMLElement));
 
 if (!window.customElements.get(LocationLite.is)) {
   window.customElements.define(LocationLite.is, LocationLite);
 } else {
   console.warn(`${LocationLite.is} is already defined somewhere. Please check your code.`);
 }
+
+export { LocationLite };
