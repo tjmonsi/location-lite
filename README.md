@@ -206,7 +206,7 @@ if you need the minified file -->
 ## And does it work on?
 
 It works on all major evergreen Browsers (Edge, Safari, Chrome, Firefox) as long as you have the Polyfills
-set (make sure to add `webcomponents-lite` or `webcomponents-loader` and create the components after the
+set (make sure to add `webcomponents-lite` or `webcomponents-loader` and load `location-lite` after the
 `WebComponentsReady` event has been fired)
 
 It also works on IE 11, Safari 11, Safari 10.1, Safari 9, and Safari 8.
@@ -232,5 +232,5 @@ npm run size
 
 ## Known Issues
 
-1. Not yet tested for Production
-2. Not yet tested using Webpack on older browsers
+1. Not yet tested for Production: https://github.com/tjmonsi/location-lite/issues/1
+2. Not yet tested using Webpack on older browsers https://github.com/tjmonsi/location-lite/issues/2
