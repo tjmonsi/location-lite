@@ -17,7 +17,7 @@ for (let testFile of testCaseFiles) {
     output: {
       file: `test/unit/cases-es5/${testFile}`,
       format: 'umd',
-      name: 'TestElements'
+      name: 'Test'
     },
     plugins: [
       resolve(), // so Rollup can find `ms`
@@ -39,7 +39,7 @@ for (let name of files) {
     output: {
       file: `dist/${name}.umd.js`,
       format: 'umd',
-      name: 'ElementLite'
+      name: 'LocationLite'
     },
     plugins: [
       resolve(), // so Rollup can find `ms`
@@ -52,7 +52,7 @@ for (let name of files) {
     output: {
       file: `dist/${name}.umd.min.js`,
       format: 'umd',
-      name: 'ElementLite'
+      name: 'LocationLite'
     },
     plugins: [
       resolve(), // so Rollup can find `ms`
@@ -66,7 +66,7 @@ for (let name of files) {
     output: {
       file: `dist/${name}.umd.es5.js`,
       format: 'umd',
-      name: 'ElementLite'
+      name: 'LocationLite'
     },
     plugins: [
       resolve(), // so Rollup can find `ms`
@@ -86,7 +86,7 @@ for (let name of files) {
     output: {
       file: `dist/${name}.umd.es5.min.js`,
       format: 'umd',
-      name: 'ElementLite'
+      name: 'LocationLite'
     },
     plugins: [
       resolve(), // so Rollup can find `ms`
