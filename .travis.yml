@@ -1,10 +1,20 @@
 sudo: required
 addons:
+  sauce_connect: true
+  firefox: latest
   chrome: stable
 language: node_js
 node_js:
-  - "8.9.4"
+- 8.9.4
 before_install:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
-script: "npm test"
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+script: npm test && npm run wct-sauce
+branches:
+  only:
+  - master
+  - develop
+env:
+  global:
+  - secure: XJAdLjm50IQcHVd7cbuoxKaWRaDIFsmJtXO2DVMVjWe5UuYK8ckFLSzeQXWuRbZUpmYb/2KNnvU5mETBhz4alVQeiVw1/qGKyuOrLjtLGASdnbYPYNfEQqRWoGP3tJYv9RVT6Iqc+01uD20wRCj7Wi+P2WA0gD1HgdeIplNnv97B13IIcu/jkS1oc7G4iOfXGfvLXd1LEs0d4lW+KSMGflOk6ABCYKscxtn5APaSUz3wtd89N0fdecVR1Fal50tUqXWgmgLmrjNsVp4l1AcvMgFwJMSR7GdJh8YGnZ/cu1ytfUKPvk/P+q3kZNnmt/1NdKFRJanfFvh6YSkuDtZzSchI9O85sTnctUbdrPclg1ZAqGjb+IDuAJ/kJK7tI87f4ORvrtWRtZP6cwXCH2kpkfmVnUHl1AnSNVwakfSeOZAz1iIt74ZD2daSz68O2frijRYr42/7SizGhhe5RJm9SDfOApJKPR1ejM1a1SU0iOXpVoEY8fzv2VWxIsbwggz/NrcnrZoq/EJAKh11ItAJuOq8+NK3VPVwQxqIEyU2TeIhLYxL4jfdiie5Cs9zPcg2xHT9Uolazrj024wzo8AUABeSCLVR0bERNkG9lH6oMxtSaJ7/cZkbGXx3rildFGF2nMUsPJ/HaMP4N6KpyqYO8LNZvxGjDKBy7GVF0S5/rYQ=
+  - secure: JcqvfwtXpJV6CfrCzZlirSVreko9qU97/3HnrR0xJ/7EW5H99HATwLqiFGvpj1z8wxLjuLNRzvRoPkiwMsNNJ4URtT8sKEbJwY41e4bTZYiDNvu/yQ3tGIhxtMy1JzVgPwocXnoU22mz4CT1vYduq3vsi4UNo7cU5TgrA5NXx3APoVifL0odmAq/s1U6ghyLH5Rz9z5r8hBs6enI2gPFsWqKlVgqXSbbr6XYCKEdAOL1tI+HDh4jSw7I9KQcmOUWgdwpcxQ465AD8AvUzohtXyOj5RmCzPR4lX7q2QmP7QEDUC0XemmOq3mh1Ry6v8oMOGpu0enF7GN8LQYdgrR7gbmBH+kUo/6hKpKioTxu6NkcDodajAtAM8TKyceoBtBWc5BWZ/XyTeUdWEWS0hzDYEP/T+K2tZVUqOXjJUoD6W1gRgKnVBbLhYi3W8hh6soXrC7MsiZ/52U8tp8FS6vTh2D31P9wS96OxJv7RZrAI+go82B+AOuwINb8gWyqXz5lf3CjE9331MdXk9JJzHLiYtPAYjGWdlFRRUFH3PquMeGw9BrtQKkPaNqUkKA8SLelghxKmZRU+vL0Jcs7EzC5o7H+u043sMFzOJzW53jQW1InyyfSfHHEENPAEV0FT4gwyZKQLZ8ygzcoUAVJCcMY8llGonwiq5wU1toMKn9xGEA=
