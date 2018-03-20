@@ -1,3 +1,6 @@
+# v0.1.4 (2018-20-03)
+- Fixed tests
+
 # v0.1.3 (2018-18-03)
 - Added ability to set path, query, and hash to reflect on window.location and window.history
 
