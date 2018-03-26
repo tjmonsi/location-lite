@@ -10,7 +10,7 @@ suite('LocationLite', () => {
 
   test('should have a path equal to test path', () => {
     const el = document.querySelector('#test');
-    expect(el.path).to.equal('/components/@littleq/location-lite/test/unit/location-lite.test.html');
+    expect(el.path).to.equal(window.location.pathname);
   });
 
   test('should have the path equal to href when a user clicks on a link', done => {
